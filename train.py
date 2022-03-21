@@ -22,6 +22,32 @@ parameters = {
     'classifier__gamma': [0.001, 0.0001]
 }
 
+'''
+#parameters for logistic regression:
+
+parameters = {
+    "vectorizer__max_df": (0.5, 0.75, 1.0),
+    # 'vectorizer__max_features': (None, 5000, 10000, 50000),
+    "vectorizer__ngram_range": ((1, 1), (1, 2)),  # unigrams or bigrams
+    # 'tfidf__use_idf': (True, False),
+    # 'tfidf__norm': ('l1', 'l2'),
+    "classifier__max_iter": (20,),
+    #"classifier__alpha": (0.00001, 0.000001),
+    "classifier__penalty": ("l2", "elasticnet"),
+    # 'classifier__max_iter': (10, 50, 80),
+}
+
+#parameters for random forest:
+parameters = {
+    "classifier__max_depth": [3, 5,10], #[3, None]
+    "classifier__max_features": [1, 3, 10],
+    "classifier__min_samples_split": [2, 5, 10], #[1, 3, 10]
+    "classifier__min_samples_leaf": [2, 5, 10], #[1, 3, 10]
+    # "bootstrap": [True, False],
+    "classifier__criterion": ["gini", "entropy"]
+}
+'''
+
 if __name__ == '__main__':
     pd.set_option('display.max_rows', 500)  # To see all rows
     pd.set_option('display.max_columns', 500)  # To see all columns
@@ -98,6 +124,8 @@ if __name__ == '__main__':
     print("Confusion matrix: \n", metrics.confusion_matrix(y_test, predicted))
 
     joblib.dump(grid_search, 'svm.pkl')
+    #joblib.dump(grid_search, 'logistic_regression.pkl')
+    #joblib.dump(grid_search, 'random_forest.pkl')
 
     # Model Accuracy
     print("SVM Accuracy:", metrics.accuracy_score(y_test, predicted))
@@ -105,30 +133,27 @@ if __name__ == '__main__':
     print("SVM Recall:", metrics.recall_score(y_test, predicted))
 
 
-
-
-
-
     # Score board:
     # 1) Logistic Regression:
-    #    Logistic Regression Accuracy: 0.9644970414201184/0.9475524475524476
-    #    Logistic Regression Precision: 1.0/0.75
-    #    Logistic Regression Recall: 0.14285714285714285/0.09375
+    #    Logistic Regression Accuracy:0.9475524475524476
+    #    Logistic Regression Precision: 0.75
+    #    Logistic Regression Recall: 0.09375
     # 2) SVM :
-    # SVM accuracy: 0.9615384615384616/0.972027972027972
-    # SVM Precision: 0.7777777777777778/0.9230769230769231
-    # SVM Recall: 0.3888888888888889/0.4444444444444444
+    # SVM accuracy: 0.972027972027972
+    # SVM Precision: 0.9230769230769231
+    # SVM Recall: 0.4444444444444444
     # 3) Random Forest :
-    # Random Forest accuracy: 0.9349112426035503/0.9702797202797203
-    # Random Forest Precision: 1.0/1.0
-    # Random Forest Recall: 0.12/0.2608695652173913
+    # Random Forest accuracy: 0.9702797202797203
+    # Random Forest Precision: 1.0
+    # Random Forest Recall: 0.2608695652173913
+    
     # Using gridSearch:
-    # SVM accuracy: 0.9585798816568047/0.9825174825174825
-    # SVM Precision: 0.8181818181818182/0.8888888888888888
-    # SVM Recall: 0.42857142857142855/0.6666666666666666
-    # Logistic Regression  accuracy: 0.9497041420118343/0.9440559440559441
-    # Logistic Regression  Precision: 0.0/0.75
-    # Logistic Regression  Recall: 0.0/0.08823529411764706
-    # Random Forest accuracy: 0.9526627218934911/0.951048951048951
-    # Random Forest Precision:  1.0
-    # Random Forest Recall: 0.058823529411764705/0.06666666666666667
+    # SVM accuracy: 0.9825174825174825
+    # SVM Precision: 0.8888888888888888
+    # SVM Recall: 0.6666666666666666
+    # Logistic Regression  accuracy: 0.9615384615384616
+    # Logistic Regression  Precision: 1.0
+    # Logistic Regression  Recall: 0.12
+    # Random Forest accuracy: 0.9458041958041958
+    # Random Forest Precision:  0.0
+    # Random Forest Recall: 0.06666666666666667
