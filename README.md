@@ -7,7 +7,7 @@ Social networks contain plenty of useful information for municipalities and othe
 
 See requierments file.
 In addition, to get the tool started you are going to need:
-1. A text file named "cluster.txt" containing a connection string to your MongoDB cluster
+1. A .env file containing a connection string to your MongoDB cluster
 2. A text file named "cookies.txt" containing browser cookies after your facebook login. For that, use browser extensions:
 
 * [Get Cookies.txt (Chrome)](https://chrome.google.com/webstore/detail/get-cookiestxt/bgaddhkoddajcdgocldbbfleckgcbcid?hl=en) 
@@ -15,9 +15,10 @@ In addition, to get the tool started you are going to need:
 
 Make sure that you include both the c_user cookie and the xs cookie.
 
-How to run:
-- Run main.py for scraping to begin
+Instructions:
+- In main.py, add FacebookGroup class objects containing desired groups name and groups id.
 - Run listener.py for the detection of content
+- Once listener is up and running, run main.py for scraping to begin
 
 
 

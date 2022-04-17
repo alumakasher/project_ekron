@@ -1,22 +1,31 @@
 from pymongo import MongoClient
 from datetime import datetime
+from dotenv import load_dotenv
 import config
+import os
 
 
-# Initiate cluster, db and collection
-def init(cluster, g_name, g_id):
+# Initiate cluster and db
+def init_mongo():
+
+    load_dotenv()
+    mongo_uri = os.environ['MONGODB_URI']
+    global db
+    client = MongoClient(mongo_uri)
+    db = client["group_scraper_new"]
+
+
+def init_collection(name, _id):
 
     global collection
-    client = MongoClient(cluster)
-    db = client["group_scraper_new"]
-    collection = db[g_name]
+    collection = db[name]
 
     group_dict = collection.find_one({'post_id': "0"})
     if not group_dict:
-        collection.insert_one({'post_id': "0", 'group_id': str(g_id)})
+        collection.insert_one({'post_id': "0", 'group_id': str(_id)})
 
 
-# When scarping with comments, remove unneeded attributes
+# When scarping with comments, remove unneeded fields
 def comments_cleanup(comments):
 
     new_comments = []
@@ -36,31 +45,20 @@ def comments_cleanup(comments):
 
 
 # If post is known to the DB, update it and save older information in an array
-def post_known(scraped_post, db_post, older_list, update_time):
+def post_known(scraped_post, db_post):
 
-    changed = {}
-
+    new_doc = {}
     for key, val in scraped_post.items():
         if key not in db_post:
             if val and key in config.POST_ATTRIBUTES:
-                changed[key] = ''
-                collection.update_one({'post_id': scraped_post['post_id']}, {"$set": {key: val}})
-            continue
-        if str(db_post[key]) != str(val):
+                new_doc[key] = val
+        else:
             if val:
-                collection.update_one({'post_id': scraped_post['post_id']}, {"$set": {key: val}})
-            else:
-                collection.update_one({'post_id': scraped_post['post_id']}, {"$unset": {key: 1}})
+                new_doc[key] = val
 
-            changed[key] = db_post[key]
-
-    collection.update_one({'post_id': scraped_post['post_id']}, {"$set": {'update_time': datetime.now()}})
-
-    if changed:
-        changed['update_time'] = update_time
-        older_list.append(changed)
-        collection.update_one({'post_id': scraped_post['post_id']}, {"$set": {'older': older_list}})
-        changed.pop("update_time")
+    new_doc['label'] = db_post['label']
+    new_doc['update_time'] = datetime.now()
+    collection.replace_one({'post_id': scraped_post['post_id']}, new_doc)
 
     return 1
 
@@ -93,12 +91,12 @@ def handle_post(scraped_post):
     db_post = collection.find_one({'post_id': scraped_post['post_id']})
 
     if db_post:
+        if db_post['label'] == "1":
+            return 1
         difference = (datetime.now() - db_post['update_time'])
         if difference.total_seconds() < 60:
             return 0
         del db_post['_id']
-        older_list = db_post.pop('older', [])
-        update_time = db_post.pop('update_time')
-        return post_known(scraped_post, db_post, older_list, update_time)
+        return post_known(scraped_post, db_post)
 
     return insert_post(scraped_post)
